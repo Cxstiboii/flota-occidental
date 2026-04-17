@@ -1,0 +1,4 @@
+node_modules/
+.env
+logs/
+src/storage/data/taxistas.json

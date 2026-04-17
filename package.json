@@ -1,0 +1,20 @@
+{
+  "name": "taxi-bot",
+  "version": "1.0.0",
+  "description": "Bot de Discord para empresa de taxis — GTA V RP",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node src/deploy-commands.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.3.0",
+    "discord-api-types": "^0.37.97",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

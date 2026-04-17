@@ -1,0 +1,13 @@
+const toList = (value, fallback) => (value ?? fallback)
+  .split(',')
+  .map(item => item.trim())
+  .filter(Boolean);
+
+module.exports = {
+  roleTaxista: toList(process.env.ROLE_TAXISTA, 'Taxista'),
+  roleSupervisor: toList(process.env.ROLE_SUPERVISOR, 'Supervisor'),
+  roleDueno: toList(process.env.ROLE_DUENO, 'Dueño'),
+  taxiCategoryId: process.env.TAXI_CATEGORY_ID || null,
+  taxiPanelChannelId: process.env.TAXI_PANEL_CHANNEL_ID || null,
+  shiftChannelPrefix: process.env.TAXI_SHIFT_CHANNEL_PREFIX || 'turno',
+};
