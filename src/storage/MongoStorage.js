@@ -68,7 +68,7 @@ class MongoStorage extends StorageAdapter {
     await Taxista.findOneAndUpdate(
       { userId },
       { $set: userData },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: 'after' },
     );
   }
 
