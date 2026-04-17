@@ -17,6 +17,12 @@ const {
 } = require('../ui/panelView');
 const { embedError, embedInfo, embedOk } = require('../utils/embeds');
 const { esTaxista, getSupervisorRoles } = require('../utils/permisos');
+const {
+  auditRideCreated,
+  auditScreenshotAttached,
+  auditShiftEnded,
+  auditShiftStarted,
+} = require('../services/auditoriaService');
 const logger = require('../utils/logger');
 
 async function handleButton(interaction) {
@@ -89,6 +95,11 @@ async function handleModalSubmit(interaction) {
     )],
   });
 
+  await auditRideCreated(interaction, result.ride, {
+    carreras: result.carreras,
+    dineroTotal: result.dineroTotal,
+  });
+
   return true;
 }
 
@@ -124,6 +135,8 @@ async function handleMessage(message) {
       ],
     )],
   });
+
+  await auditScreenshotAttached(message, result.ride);
 
   return true;
 }
@@ -204,6 +217,8 @@ async function startShiftFlow(interaction) {
     )],
   });
 
+  await auditShiftStarted(interaction, shiftChannel, result.taxista);
+
   return true;
 }
 
@@ -228,22 +243,9 @@ async function endShiftFlow(interaction) {
       const shiftChannel = await interaction.guild.channels.fetch(progress.activeShift.channelId);
 
       if (shiftChannel) {
-        // Enviar resumen primero
-        await shiftChannel.send({
-          embeds: [buildShiftSummaryEmbed(interaction.member.displayName, result.resumen)],
-        });
-
-        // Renombrar canal
-        await shiftChannel.setName(`cerrado-${shiftChannel.name}`.slice(0, 100));
-
-        // Quitar permisos al taxista
-        await shiftChannel.permissionOverwrites.edit(interaction.user.id, {
-          SendMessages: false,
-          AttachFiles: false,
-        });
+        await shiftChannel.delete(`Canal de turno cerrado por ${interaction.user.tag}`);
       }
     } catch (error) {
-      // Canal eliminado o sin acceso — no es crítico, el turno ya se guardó
       logger.warn(`No se pudo cerrar el canal ${progress.activeShift.channelId}: ${error.message}`);
     }
   }
@@ -251,6 +253,8 @@ async function endShiftFlow(interaction) {
   await interaction.editReply({
     embeds: [buildShiftSummaryEmbed(interaction.member.displayName, result.resumen)],
   });
+
+  await auditShiftEnded(interaction, result.resumen, progress.activeShift?.channelId ?? null);
 
   return true;
 }

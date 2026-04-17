@@ -34,6 +34,10 @@ function esSupervisor(member) {
   );
 }
 
+function esDueno(member) {
+  return hasAnyRole(member, config.roleDuenoIds, config.roleDueno);
+}
+
 /**
  * Devuelve los objetos Role de supervisores y dueños en el servidor.
  * Usa IDs si están configurados, nombres como fallback.
@@ -51,4 +55,4 @@ function getSupervisorRoles(guild) {
   return guild.roles.cache.filter(role => names.includes(role.name)).map(role => role);
 }
 
-module.exports = { esTaxista, esSupervisor, getSupervisorRoles };
+module.exports = { esTaxista, esSupervisor, esDueno, getSupervisorRoles };

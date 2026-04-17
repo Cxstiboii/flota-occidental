@@ -16,5 +16,6 @@ module.exports = {
 
   taxiCategoryId:    process.env.TAXI_CATEGORY_ID    || null,
   taxiPanelChannelId: process.env.TAXI_PANEL_CHANNEL_ID || null,
+  auditChannelId: process.env.TAXI_AUDIT_CHANNEL_ID || null,
   shiftChannelPrefix: process.env.TAXI_SHIFT_CHANNEL_PREFIX || 'turno',
 };

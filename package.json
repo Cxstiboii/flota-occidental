@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Bot de Discord para empresa de taxis — GTA V RP",
   "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node index.js",
     "deploy": "node src/deploy-commands.js",
@@ -13,7 +16,8 @@
     "async-mutex": "^0.5.0",
     "discord-api-types": "^0.37.97",
     "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "mongoose": "^9.4.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

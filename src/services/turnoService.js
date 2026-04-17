@@ -1,7 +1,5 @@
-const JsonStorage = require('../storage/JsonStorage');
+const storage = require('../storage');
 const logger = require('../utils/logger');
-
-const storage = new JsonStorage();
 
 function defaultTaxista(userId) {
   return {
@@ -54,9 +52,13 @@ async function finalizarTurno(userId, options = {}) {
 
   const inicio = new Date(taxista.inicioTurno);
   const fin = new Date(options.endedAt ?? new Date().toISOString());
-  const pendientesCaptura = taxista.registrosCarreras.filter(
-    ride => ride.shiftId === taxista.activeShift?.id && !ride.screenshotUrl,
-  ).length;
+
+  // Carreras de este turno específico
+  const carrerasDelTurno = taxista.registrosCarreras.filter(
+    ride => ride.shiftId === taxista.activeShift?.id,
+  );
+
+  const pendientesCaptura = carrerasDelTurno.filter(ride => !ride.screenshotUrl).length;
 
   const resumen = {
     shiftId: taxista.activeShift?.id ?? null,
@@ -68,7 +70,13 @@ async function finalizarTurno(userId, options = {}) {
     dineroTotal: taxista.dineroTotal,
     channelId: taxista.activeShift?.channelId ?? null,
     pendientesCaptura,
+    registros: carrerasDelTurno, // ← carreras movidas al historial
   };
+
+  // Eliminar del array raíz solo las carreras de este turno
+  taxista.registrosCarreras = taxista.registrosCarreras.filter(
+    ride => ride.shiftId !== taxista.activeShift?.id,
+  );
 
   taxista.historial.push(resumen);
   taxista.turnoActivo = false;

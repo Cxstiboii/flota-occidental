@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { getRanking } = require('../services/estadisticasService');
 const { esSupervisor } = require('../utils/permisos');
 const { embedInfo, embedError } = require('../utils/embeds');
@@ -14,7 +14,7 @@ module.exports = {
     if (!esSupervisor(interaction.member)) {
       return interaction.reply({
         embeds: [embedError('Solo **Supervisores** y **Dueños** pueden ver el ranking.')],
-        ephemeral: 64,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
