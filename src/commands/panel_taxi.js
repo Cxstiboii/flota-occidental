@@ -12,7 +12,7 @@ module.exports = {
     if (!esSupervisor(interaction.member)) {
       return interaction.reply({
         embeds: [embedError('Solo Supervisores y Dueños pueden publicar el panel.')],
-        ephemeral: true,
+        ephemeral: 64,
       });
     }
 

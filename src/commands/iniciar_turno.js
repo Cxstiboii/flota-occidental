@@ -12,7 +12,7 @@ module.exports = {
     if (!esTaxista(interaction.member)) {
       return interaction.reply({
         embeds: [embedError('No tienes el rol **Taxista** necesario para usar este comando.')],
-        ephemeral: true,
+        ephemeral: 64,
       });
     }
 

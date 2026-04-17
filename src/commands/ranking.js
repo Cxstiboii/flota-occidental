@@ -14,7 +14,7 @@ module.exports = {
     if (!esSupervisor(interaction.member)) {
       return interaction.reply({
         embeds: [embedError('Solo **Supervisores** y **Dueños** pueden ver el ranking.')],
-        ephemeral: true,
+        ephemeral: 64,
       });
     }
 

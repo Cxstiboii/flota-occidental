@@ -8,8 +8,10 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
+
 client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, 'src', 'commands');
@@ -30,5 +32,13 @@ for (const file of fs.readdirSync(eventsPath).filter(f => f.endsWith('.js'))) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
+
+client.on('error', (error) => {
+  logger.error(`Error del cliente de Discord: ${error.message}`);
+});
+
+client.on('shardError', (error) => {
+  logger.error(`Error de shard de Discord: ${error.message}`);
+});
 
 client.login(process.env.DISCORD_TOKEN);

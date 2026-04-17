@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 const { embedError } = require('../utils/embeds');
 const { handleButton, handleModalSubmit } = require('../controllers/panelController');
@@ -26,7 +27,7 @@ module.exports = {
       logger.error(`Error en /${interaction.commandName}: ${err.message}`);
       const reply = {
         embeds: [embedError('Ocurrió un error interno. Contacta a un administrador.')],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       };
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp(reply);

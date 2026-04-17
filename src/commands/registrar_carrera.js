@@ -18,7 +18,7 @@ module.exports = {
     if (!esTaxista(interaction.member)) {
       return interaction.reply({
         embeds: [embedError('No tienes el rol **Taxista** necesario.')],
-        ephemeral: true,
+        ephemeral: 64,
       });
     }
 

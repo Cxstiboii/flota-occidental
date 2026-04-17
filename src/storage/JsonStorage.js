@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { Mutex } = require('async-mutex');
 const StorageAdapter = require('./StorageAdapter');
 
 const DATA_PATH = path.join(__dirname, 'data', 'taxistas.json');
@@ -7,6 +8,7 @@ const DATA_PATH = path.join(__dirname, 'data', 'taxistas.json');
 class JsonStorage extends StorageAdapter {
   constructor() {
     super();
+    this._mutex = new Mutex();
     this._ensureFile();
   }
 
@@ -56,7 +58,6 @@ class JsonStorage extends StorageAdapter {
           users: raw.users,
         };
       }
-
       return {
         metadata: {
           version: 2,
@@ -81,28 +82,51 @@ class JsonStorage extends StorageAdapter {
   }
 
   async get(userId) {
-    const state = this._readState();
-    const user = state.users[userId];
-    return user ? this._normalizeUser(userId, user) : null;
+    const release = await this._mutex.acquire();
+    try {
+      const state = this._readState();
+      const user = state.users[userId];
+      return user ? this._normalizeUser(userId, user) : null;
+    } finally {
+      release();
+    }
   }
 
   async set(userId, userData) {
-    const state = this._readState();
-    state.users[userId] = this._normalizeUser(userId, userData);
-    this._writeState(state);
+    const release = await this._mutex.acquire();
+    try {
+      const state = this._readState();
+      state.users[userId] = this._normalizeUser(userId, userData);
+      this._writeState(state);
+    } finally {
+      release();
+    }
   }
 
   async getAll() {
-    const state = this._readState();
-    return Object.fromEntries(
-      Object.entries(state.users).map(([userId, userData]) => [userId, this._normalizeUser(userId, userData)]),
-    );
+    const release = await this._mutex.acquire();
+    try {
+      const state = this._readState();
+      return Object.fromEntries(
+        Object.entries(state.users).map(([userId, userData]) => [
+          userId,
+          this._normalizeUser(userId, userData),
+        ]),
+      );
+    } finally {
+      release();
+    }
   }
 
   async delete(userId) {
-    const state = this._readState();
-    delete state.users[userId];
-    this._writeState(state);
+    const release = await this._mutex.acquire();
+    try {
+      const state = this._readState();
+      delete state.users[userId];
+      this._writeState(state);
+    } finally {
+      release();
+    }
   }
 }
 
