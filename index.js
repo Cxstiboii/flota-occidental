@@ -59,3 +59,15 @@ main().catch((error) => {
   logger.error(`No se pudo iniciar el bot: ${error.message}`);
   process.exit(1);
 });
+
+// Promesas rechazadas que nadie catcheó (bugs async silenciosos)
+process.on('unhandledRejection', (reason) => {
+  const msg = reason instanceof Error ? reason.stack ?? reason.message : String(reason);
+  logger.error(`[unhandledRejection] ${msg}`);
+});
+
+// Excepciones síncronas fuera de cualquier handler — estado incierto, reiniciar
+process.on('uncaughtException', (error) => {
+  logger.error(`[uncaughtException] ${error.stack ?? error.message}`);
+  process.exit(1);
+});

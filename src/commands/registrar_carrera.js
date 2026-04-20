@@ -2,6 +2,8 @@ const { SlashCommandBuilder } = require('discord.js');
 const { registrarCarrera } = require('../services/turnoService');
 const { esTaxista } = require('../utils/permisos');
 const { embedOk, embedError } = require('../utils/embeds');
+const { safeReply } = require('../utils/discordResponses');
+const { alertCarreraFueraDeRango, alertMaxCarrerasAlcanzado } = require('../services/auditoriaService');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,10 +18,10 @@ module.exports = {
 
   async execute(interaction) {
     if (!esTaxista(interaction.member)) {
-      return interaction.reply({
+      return safeReply(interaction, {
         embeds: [embedError('No tienes el rol **Taxista** necesario.')],
-        ephemeral: 64,
-      });
+        ephemeral: true,
+      }, 'command=/registrar_carrera no-role');
     }
 
     const dinero = interaction.options.getInteger('dinero');
@@ -32,19 +34,25 @@ module.exports = {
     });
 
     if (!result.ok) {
-      return interaction.reply({ embeds: [embedError(result.msg)], ephemeral: true });
+      // Enviar alerta a supervisores si aplica (sin bloquear la respuesta al taxista)
+      if (result.code === 'VALOR_MAX') {
+        alertCarreraFueraDeRango(interaction.client, interaction.guild, interaction.member, result).catch(() => {});
+      } else if (result.code === 'MAX_CARRERAS') {
+        alertMaxCarrerasAlcanzado(interaction.client, interaction.guild, interaction.member, result).catch(() => {});
+      }
+      return safeReply(interaction, { embeds: [embedError(result.msg)], ephemeral: true }, 'command=/registrar_carrera service-error');
     }
 
-    return interaction.reply({
+    return safeReply(interaction, {
       embeds: [embedOk(
         '🚕 Carrera Registrada',
-        `Registro rapido creado para **${interaction.member.displayName}**. Para una mejor UX usa el panel con botones dentro de tu canal de turno.`,
+        `Registro rapido creado para **${interaction.member.displayName}**.\n\n⚠️ **Debes enviar una screenshot** en tu canal de turno para completar el registro. Hasta que lo hagas no podrás registrar otra carrera.\n\nPara mayor comodidad, usa el botón "Registrar carrera" dentro de tu canal de turno.`,
         [
           { name: '💵 Cobrado',        value: `$${dinero.toLocaleString()}`,             inline: true },
           { name: '🚗 Total Carreras', value: `${result.carreras}`,                       inline: true },
           { name: '💰 Acumulado',      value: `$${result.dineroTotal.toLocaleString()}`, inline: true },
         ],
       )],
-    });
+    }, 'command=/registrar_carrera success');
   },
 };

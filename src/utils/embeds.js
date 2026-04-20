@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 const COLOR_OK   = 0xF5C518; // amarillo taxi
 const COLOR_ERR  = 0xFF4757;
 const COLOR_INFO = 0x2ED573;
-const FOOTER     = 'Los Santos Taxi Co.';
+const FOOTER     = 'Flota Occidental';
 
 function embedOk(title, desc, fields = []) {
   const e = new EmbedBuilder()

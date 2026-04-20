@@ -5,11 +5,12 @@ const {
 } = require('discord.js');
 const { embedInfo, embedOk } = require('../utils/embeds');
 
-function buildTaxiPanelEmbed() {
+function buildTaxiPanelEmbed(activosCount = 0) {
   return embedInfo(
     'Panel de Flota Occidental',
     'Gestiona tu turno desde este panel. Inicia turno para abrir tu canal privado y registra cada carrera desde ahi con evidencia.',
     [
+      { name: '🟢 Taxistas en turno ahora', value: `${activosCount}`, inline: true },
       { name: '1. Iniciar turno', value: 'Crea tu canal privado de trabajo.', inline: false },
       { name: '2. Registrar carrera', value: 'Usa el boton dentro de tu canal para abrir un formulario.', inline: false },
       { name: '3. Adjuntar screenshot', value: 'Sube la imagen en tu canal de turno y el bot la enlaza automaticamente.', inline: false },

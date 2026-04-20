@@ -2,6 +2,7 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { getDashboard } = require('../services/estadisticasService');
 const { esSupervisor } = require('../utils/permisos');
 const { embedError, embedInfo } = require('../utils/embeds');
+const { safeReply, safeDeferReply, safeEditReply } = require('../utils/discordResponses');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,13 +11,13 @@ module.exports = {
 
   async execute(interaction) {
     if (!esSupervisor(interaction.member)) {
-      return interaction.reply({
+      return safeReply(interaction, {
         embeds: [embedError('Solo Supervisores y Dueños pueden consultar el dashboard.')],
         flags: MessageFlags.Ephemeral,
-      });
+      }, 'command=/dashboard_taxi no-role');
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await safeDeferReply(interaction, { flags: MessageFlags.Ephemeral }, 'command=/dashboard_taxi');
     const data = await getDashboard(interaction.guild);
 
     const topFields = data.topTaxistas.length > 0
@@ -27,7 +28,7 @@ module.exports = {
         }))
       : [{ name: 'Top taxistas', value: 'Aun no hay informacion registrada.', inline: false }];
 
-    return interaction.editReply({
+    return safeEditReply(interaction, {
       embeds: [embedInfo(
         'Dashboard global de Flota Occidental',
         'Vista rapida del estado operativo e historico.',
@@ -42,6 +43,6 @@ module.exports = {
           ...topFields,
         ],
       )],
-    });
+    }, 'command=/dashboard_taxi success');
   },
 };

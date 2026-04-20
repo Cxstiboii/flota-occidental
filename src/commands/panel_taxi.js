@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const { publishPanel } = require('../controllers/panelController');
 const { esSupervisor } = require('../utils/permisos');
 const { embedError } = require('../utils/embeds');
+const { safeReply } = require('../utils/discordResponses');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,10 +11,10 @@ module.exports = {
 
   async execute(interaction) {
     if (!esSupervisor(interaction.member)) {
-      return interaction.reply({
+      return safeReply(interaction, {
         embeds: [embedError('Solo Supervisores y Dueños pueden publicar el panel.')],
-        ephemeral: 64,
-      });
+        ephemeral: true,
+      }, 'command=/panel_taxi no-role');
     }
 
     return publishPanel(interaction);

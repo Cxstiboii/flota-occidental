@@ -2,6 +2,7 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { getTaxistaDetalle } = require('../services/estadisticasService');
 const { esSupervisor } = require('../utils/permisos');
 const { embedError, embedInfo } = require('../utils/embeds');
+const { safeReply, safeDeferReply, safeEditReply } = require('../utils/discordResponses');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,31 +16,34 @@ module.exports = {
 
   async execute(interaction) {
     if (!esSupervisor(interaction.member)) {
-      return interaction.reply({
+      return safeReply(interaction, {
         embeds: [embedError('Solo Supervisores y Dueños pueden consultar este detalle.')],
         flags: MessageFlags.Ephemeral,
-      });
+      }, 'command=/taxista_detalle no-role');
     }
 
     const usuario = interaction.options.getUser('usuario', true);
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await safeDeferReply(interaction, { flags: MessageFlags.Ephemeral }, 'command=/taxista_detalle');
 
     const detalle = await getTaxistaDetalle(interaction.guild, usuario.id);
     if (!detalle) {
-      return interaction.editReply({
+      return safeEditReply(interaction, {
         embeds: [embedError('Ese taxista aun no tiene informacion registrada.')],
-      });
+      }, 'command=/taxista_detalle missing-data');
     }
 
     const ultimasCarreras = detalle.ultimasCarreras.length > 0
-      ? detalle.ultimasCarreras.map(carrera => ({
-          name: `${carrera.origin} -> ${carrera.destination}`,
-          value: `💵 $${Number(carrera.valor).toLocaleString()} | 📸 ${carrera.screenshotUrl ? 'Si' : 'No'} | <t:${Math.floor(new Date(carrera.createdAt).getTime() / 1000)}:R>`,
-          inline: false,
-        }))
+      ? detalle.ultimasCarreras.map(carrera => {
+          const ts = carrera.createdAt ? `<t:${Math.floor(new Date(carrera.createdAt).getTime() / 1000)}:R>` : 'N/D';
+          return {
+            name: `${carrera.origin} -> ${carrera.destination}`,
+            value: `💵 $${Number(carrera.valor).toLocaleString()} | 📸 ${carrera.screenshotUrl ? 'Si' : 'No'} | ${ts}`,
+            inline: false,
+          };
+        })
       : [{ name: 'Ultimas carreras', value: 'Sin carreras registradas.', inline: false }];
 
-    return interaction.editReply({
+    return safeEditReply(interaction, {
       embeds: [embedInfo(
         `Detalle de ${detalle.nombre}`,
         `Usuario: <@${detalle.userId}>`,
@@ -55,6 +59,6 @@ module.exports = {
           ...ultimasCarreras,
         ],
       )],
-    });
+    }, 'command=/taxista_detalle success');
   },
 };
