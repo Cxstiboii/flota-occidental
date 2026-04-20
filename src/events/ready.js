@@ -10,6 +10,8 @@ const { alertOrphanChannels } = require('../services/auditoriaService');
 const { iniciarMonitorTurnos } = require('../services/turnoMonitor');
 const { iniciarCrons } = require('../services/cronService');
 const { iniciarDashboard } = require('../services/dashboardService');
+const { iniciarMonitorServidor } = require('../services/rageService');
+const { iniciarAdminDashboard }  = require('../services/adminDashboardService');
 
 module.exports = {
   name: 'clientReady',
@@ -24,6 +26,8 @@ module.exports = {
     await verifyActiveShiftChannels(client);
     iniciarMonitorTurnos(client);
     iniciarDashboard(client);
+    iniciarAdminDashboard(client);
+    iniciarMonitorServidor(client);
     iniciarCrons(client);
   },
 };

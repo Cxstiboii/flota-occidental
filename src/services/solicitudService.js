@@ -66,22 +66,6 @@ async function verificarElegibilidad(userId, guildId, member) {
     };
   }
 
-  // 4. Rechazo reciente (7 días)
-  const cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-  const recentRejection = await Solicitud.findOne({
-    userId, guildId,
-    estado: 'rechazado',
-    fechaRechazo: { $gte: cutoff },
-  });
-  if (recentRejection) {
-    const nextDate = new Date(recentRejection.fechaRechazo.getTime() + 3 * 24 * 60 * 60 * 1000);
-    const ts = Math.floor(nextDate.getTime() / 1000);
-    return {
-      ok: false,
-      razon: `Tu solicitud fue rechazada recientemente. Podrás volver a aplicar el <t:${ts}:F>.`,
-    };
-  }
-
   return { ok: true };
 }
 

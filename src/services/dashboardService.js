@@ -1,7 +1,8 @@
 'use strict';
 const { EmbedBuilder } = require('discord.js');
 const storage = require('../storage');
-const logger = require('../utils/logger');
+const logger  = require('../utils/logger');
+const { getServerStatus, formatServerStatus } = require('./rageService');
 
 const TIMEZONE        = process.env.TIMEZONE || 'America/Bogota';
 const UPDATE_INTERVAL = Number(process.env.DASHBOARD_UPDATE_INTERVAL) || 300000;
@@ -122,6 +123,29 @@ async function buildDashboardEmbed(guild) {
     ].join('\n'),
     inline: false,
   });
+
+  // Sección servidor ORION
+  try {
+    const status = await getServerStatus();
+    const fmt    = formatServerStatus(status);
+    const peak   = (status.peak || 0).toLocaleString();
+    const horaVerif = new Date(status.lastCheck).toLocaleTimeString('es-CO', {
+      timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    embed.addFields({
+      name: '🎮 Servidor ORION',
+      value: [
+        fmt.estado,
+        `👥 Jugadores: **${fmt.jugadores}**`,
+        fmt.barra,
+        `📊 Peak histórico: **${peak}**`,
+        `🕐 Verificado: ${horaVerif}`,
+      ].join('\n'),
+      inline: false,
+    });
+  } catch {
+    embed.addFields({ name: '🎮 Servidor ORION', value: '⚠️ Estado no disponible', inline: false });
+  }
 
   embed.setFooter({ text: `Actualizado: ${horaLocal} • Próxima actualización en 5 min` });
 
